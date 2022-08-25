@@ -1,5 +1,8 @@
 import { Subject } from "rxjs";
+import { HttpClient, HttpClientModule } from "@angular/common/http";
+import { Injectable } from "@angular/core";
 
+@Injectable()
 export class AppareilService {
     appareilSubject = new Subject<any[]>();
 
@@ -21,7 +24,9 @@ export class AppareilService {
         }
     ]
     
+    constructor(private httpClient: HttpClient){}
     emitAppareilSubject(){
+
         this.appareilSubject.next(this.appareils.slice());
     }
 
@@ -70,4 +75,33 @@ export class AppareilService {
         this.emitAppareilSubject();
 
     }
+
+    saveAppareilsToServer(): void{
+        this.httpClient.post("https://http-client-demo-a8170.appspot.com/appareils.json",this.appareils)
+        .subscribe(
+            ()=>{
+                console.log('Enregistrement terminé')
+            },
+            (error) =>{
+                console.log('Erreur de sauvegarde ! '+error);
+            }
+        );
+
+    }
+
+    getAppareilsFromServer(){
+        this.httpClient
+        .get<any[]>('http://localhost:3000/appareils')
+        .subscribe(
+            (response) =>{
+                this.appareils = response;
+                console.log("resultat"+this.appareils)
+                this.emitAppareilSubject();
+            },
+            (error) => {
+                console.log('Erreur de chargement !'+error);
+            }
+        )
+    }
+
 }
